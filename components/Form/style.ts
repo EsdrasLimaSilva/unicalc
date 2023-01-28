@@ -49,6 +49,12 @@ span.warning-form{
    width: 100%;
 }
 
+p.login-error{
+   font-size: 0.95rem;
+   color: ${({ theme }) => theme.alert[500]};
+   font-weight: 600;
+}
+
 `;
 
 export default StyledForm;

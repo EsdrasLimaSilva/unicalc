@@ -4,18 +4,27 @@ import Form from "../Form";
 import Input from "../Input";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormState, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useState } from "react";
 import registerUser from "@/services/register";
 import { ErrorMessage } from "@hookform/error-message";
 import Spinner from "../spinner";
+import writeUserData from "@/services/writeUserData";
+import { FirebaseError } from "firebase/app";
+import { useRouter } from "next/router";
 
 const SignUpForm = () => {
-   //sign up states
+   //local states and control
    const [creatingUser, setCreatingUser] = useState(false);
+   const [loginError, setLoginError] = useState({
+      happened: false,
+      message: "",
+   });
+   const router = useRouter();
 
    const toggleToSignIn = useToggleFormMode(changeToSignIn);
 
+   // form validation
    const formSchema = yup.object().shape({
       name: yup.string().required("preencha seu email"),
       course: yup.string().required("preencha seu curso"),
@@ -31,10 +40,31 @@ const SignUpForm = () => {
    const { register, handleSubmit, formState } = useForm(formOptions);
    const { errors } = formState;
 
+   // submit function
    const submit = async (data: any) => {
-      setCreatingUser(true);
-      const { name, course, email, password } = data;
-      const { user } = await registerUser(email, password, name, course);
+      try {
+         setCreatingUser(true);
+         const { name, course, email, password } = data;
+         const { user } = await registerUser(email, password, name, course);
+
+         await writeUserData(user.uid, name, email, course);
+         router.replace("/");
+      } catch (error) {
+         const errorCode = (error as FirebaseError).code;
+
+         const errorMessage =
+            errorCode == "auth/email-already-in-use"
+               ? "O email informado já está em uso"
+               : errorCode;
+
+         setLoginError((prev) => ({ ...prev, happened: true, message: errorMessage }));
+      } finally {
+         setCreatingUser(false);
+
+         setTimeout(() => {
+            setLoginError((prev) => ({ ...prev, happened: false, message: "" }));
+         }, 3000);
+      }
    };
 
    if (creatingUser) return <Spinner />;
@@ -80,6 +110,8 @@ const SignUpForm = () => {
             <button type="button" onClick={toggleToSignIn}>
                entrar com uma conta
             </button>
+
+            {loginError.happened && <p className="login-error">{loginError.message}</p>}
 
             <button type="submit">criar conta</button>
          </Form>
