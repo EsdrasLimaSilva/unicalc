@@ -2,18 +2,80 @@ import useToggleFormMode from "@/hooks/useToggleFormMode";
 import { changeToSignIn } from "@/redux/slices/loginSlice";
 import Form from "../Form";
 import Input from "../Input";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { FormState, useForm } from "react-hook-form";
+import { useState } from "react";
+import registerUser from "@/services/register";
+import { ErrorMessage } from "@hookform/error-message";
+import Spinner from "../spinner";
 
 const SignUpForm = () => {
+   //sign up states
+   const [creatingUser, setCreatingUser] = useState(false);
+
    const toggleToSignIn = useToggleFormMode(changeToSignIn);
+
+   const formSchema = yup.object().shape({
+      name: yup.string().required("preencha seu email"),
+      course: yup.string().required("preencha seu curso"),
+      email: yup.string().required("preencha seu email"),
+      password: yup.string().required("preencha sua senha").min(8, "mínimo 8 caracteres"),
+      confirmPassword: yup
+         .string()
+         .required("confirme sua senha")
+         .oneOf([yup.ref("password")], "senhas não batem"),
+   });
+
+   const formOptions = { resolver: yupResolver(formSchema) };
+   const { register, handleSubmit, formState } = useForm(formOptions);
+   const { errors } = formState;
+
+   const submit = async (data: any) => {
+      setCreatingUser(true);
+      const { name, course, email, password } = data;
+      const { user } = await registerUser(email, password, name, course);
+   };
+
+   if (creatingUser) return <Spinner />;
 
    return (
       <>
-         <Form>
-            <Input type="text" placeholder="nome" />
-            <Input type="text" placeholder="curso" />
-            <Input type="email" placeholder="email" />
-            <Input type="password" placeholder="senha" />
-            <Input type="password" placeholder="confirmar senha" />
+         <Form onSubmit={handleSubmit(submit)}>
+            <ErrorMessage
+               errors={errors}
+               name="name"
+               render={({ message }) => <span className="warning-form">{message}</span>}
+            />
+            <Input type="text" placeholder="nome" {...register("name")} />
+
+            <ErrorMessage
+               errors={errors}
+               name="course"
+               render={({ message }) => <span className="warning-form">{message}</span>}
+            />
+            <Input type="text" placeholder="curso" {...register("course")} />
+
+            <ErrorMessage
+               errors={errors}
+               name="email"
+               render={({ message }) => <span className="warning-form">{message}</span>}
+            />
+            <Input type="email" placeholder="email" {...register("email")} />
+
+            <ErrorMessage
+               errors={errors}
+               name="password"
+               render={({ message }) => <span className="warning-form">{message}</span>}
+            />
+            <Input type="password" placeholder="senha" {...register("password")} />
+
+            <ErrorMessage
+               errors={errors}
+               name="confirmPassword"
+               render={({ message }) => <span className="warning-form">{message}</span>}
+            />
+            <Input type="password" placeholder="confirmar senha" {...register("confirmPassword")} />
 
             <button type="button" onClick={toggleToSignIn}>
                entrar com uma conta

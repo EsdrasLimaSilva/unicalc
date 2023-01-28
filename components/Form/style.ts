@@ -41,7 +41,12 @@ button[type="submit"]{
    }
 }
 
-@media (max-width: 376px){
+
+span.warning-form{
+   font-size: 0.9rem;
+   color: ${({ theme }) => theme.alert[500]};
+   float: right;
+   width: 100%;
 }
 
 `;

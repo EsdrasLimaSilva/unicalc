@@ -1,8 +1,12 @@
-import { InputHTMLAttributes } from "react";
+import { forwardRef, InputHTMLAttributes, Ref } from "react";
 import StyledInput from "./style";
 
-const Input = ({ ...props }: InputHTMLAttributes<HTMLInputElement>) => {
-   return <StyledInput {...props} />;
-};
+const Input = forwardRef(
+   ({ ...props }: InputHTMLAttributes<HTMLInputElement>, ref: Ref<HTMLInputElement>) => {
+      return <StyledInput {...props} ref={ref} />;
+   },
+);
+
+Input.displayName = "Input";
 
 export default Input;
