@@ -12,6 +12,8 @@ const GlobalStyle = createGlobalStyle`
       font-family: Arial, Helvetica, sans-serif;
       color: ${({ theme }) => theme.neutral[900]};
    }
+
+
 `;
 
 export default GlobalStyle;
