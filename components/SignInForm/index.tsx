@@ -42,33 +42,20 @@ const SignInForm = () => {
 
          switch (errorCode) {
             case "auth/wrong-password":
+               setGettingUser(false);
                setLoginError((prev) => ({ ...prev, happened: true, message: "Senha incorreta" }));
                break;
             case "auth/user-not-found":
-               setLoginError((prev) => ({
-                  ...prev,
-                  happened: true,
-                  message: "Email não registrado",
-               }));
+               setGettingUser(false);
+               setLoginError({ happened: true, message: "Email não registrado" });
                break;
             default:
-               setLoginError((prev) => ({
-                  ...prev,
-                  happened: true,
-                  message: errorCode,
-               }));
+               setGettingUser(false);
+               setLoginError({ happened: true, message: errorCode });
          }
-
-         console.log(error);
       } finally {
-         if (loginError.happened) setGettingUser(false);
-
          setTimeout(() => {
-            setLoginError((prev) => ({
-               ...prev,
-               happened: false,
-               message: "",
-            }));
+            setLoginError({ happened: false, message: "" });
          }, 5000);
       }
    };

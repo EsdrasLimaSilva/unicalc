@@ -50,6 +50,7 @@ const SignUpForm = () => {
          await writeUserData(user.uid, name, email, course);
          router.replace("/");
       } catch (error) {
+         setCreatingUser(false);
          const errorCode = (error as FirebaseError).code;
 
          const errorMessage =
@@ -59,8 +60,6 @@ const SignUpForm = () => {
 
          setLoginError((prev) => ({ ...prev, happened: true, message: errorMessage }));
       } finally {
-         setCreatingUser(false);
-
          setTimeout(() => {
             setLoginError((prev) => ({ ...prev, happened: false, message: "" }));
          }, 3000);
